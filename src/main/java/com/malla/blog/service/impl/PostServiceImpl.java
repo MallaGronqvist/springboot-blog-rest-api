@@ -1,6 +1,7 @@
 package com.malla.blog.service.impl;
 
 import com.malla.blog.entity.Post;
+import com.malla.blog.exception.ResourceNotFoundException;
 import com.malla.blog.payload.PostDto;
 import com.malla.blog.repository.PostRepository;
 import com.malla.blog.service.PostService;
@@ -50,5 +51,29 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> getAllPosts() {
         List<Post> posts = postRepository.findAll();
         return posts.stream().map(post -> mapToDto(post)).collect(Collectors.toList());
+    }
+
+    @Override
+    public PostDto getPostById(long id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "Id", id));
+        return mapToDto(post);
+    }
+
+    @Override
+    public PostDto updatePost(PostDto postDto, long id) {
+        Post post = postRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Post", "id", id));
+        post.setTitle(postDto.getTitle());
+        post.setContent(postDto.getContent());
+        post.setDescription(postDto.getDescription());
+
+        Post updatedPost = postRepository.save(post);
+
+        return mapToDto(updatedPost);
+    }
+
+    @Override
+    public void deletePostById(long id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+        postRepository.delete(post);
     }
 }
