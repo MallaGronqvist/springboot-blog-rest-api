@@ -3,6 +3,7 @@ package com.malla.blog.service.impl;
 import com.malla.blog.entity.Post;
 import com.malla.blog.exception.ResourceNotFoundException;
 import com.malla.blog.payload.PostDto;
+import com.malla.blog.payload.PostResponse;
 import com.malla.blog.repository.PostRepository;
 import com.malla.blog.service.PostService;
 import org.springframework.data.domain.Page;
@@ -51,7 +52,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> getAllPosts(int pageNo, int pageSize) {
+    public PostResponse getAllPosts(int pageNo, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
@@ -59,7 +60,17 @@ public class PostServiceImpl implements PostService {
 
         List<Post> listOfPosts = posts.getContent();
 
-        return listOfPosts.stream().map(post -> mapToDto(post)).collect(Collectors.toList());
+        List<PostDto> content = listOfPosts.stream().map(post -> mapToDto(post)).collect(Collectors.toList());
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setContent(content);
+        postResponse.setPageNo(posts.getNumber());
+        postResponse.setPageSize(posts.getSize());
+        postResponse.setTotalElements(posts.getTotalElements());
+        postResponse.setTotalPages(posts.getTotalPages());
+        postResponse.setLast(posts.isLast());
+
+        return postResponse;
     }
 
     @Override
